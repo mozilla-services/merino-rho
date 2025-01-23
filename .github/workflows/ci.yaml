@@ -33,6 +33,6 @@ jobs:
           TEST_RESULTS_DIR: workspace/test-results
       - name: Generate test coverage
         run: make coverage-unit
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with: 
           path: workspace/test-results/
