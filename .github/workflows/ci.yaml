@@ -27,7 +27,7 @@ jobs:
           cache: "poetry"
       - name: Create workspace
         run: mkdir -p workspace
-      - name: Run code linting
+      - name: Run unit tests
         run: make unit-tests
         env:
           TEST_RESULTS_DIR: workspace/test-results
