@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: "poetry"
-      - name: Run code linting
+      - name: Run Code Linting
         run: make -k lint
   unit-tests:
     runs-on: ubuntu-latest
@@ -25,14 +25,73 @@ jobs:
         with:
           python-version: "3.12"
           cache: "poetry"
-      - name: Create workspace
+      - name: Create Workspace
         run: mkdir -p workspace
       - name: Run unit tests
         run: make unit-tests
         env:
           TEST_RESULTS_DIR: workspace/test-results
-      - name: Generate test coverage
+      - name: Generate Test Coverage
         run: make coverage-unit
       - uses: actions/upload-artifact@v4
         with: 
+          name: unit-test-results
+          include-hidden-files: true
+          path: |
+            workspace/test-results
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+      - name: Create Workspace
+        run: mkdir -p workspace
+      - name: Run Integration Tests
+        run: make integration-tests
+        env:
+          TEST_RESULTS_DIR: workspace/test-results
+      - name: Generate Test Coverage
+        run: make coverage-integration
+      - uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          include-hidden-files: true
+          path: |
+            workspace/test-results
+  test-coverage-checks:
+    needs: [unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+      - name: Create Workspace
+        run: mkdir -p workspace
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
           path: workspace/test-results/
+          merge-multiple: true
+      - name: List test artifacts
+        run: ls -al workspace/test-results/
+      - name: Evaluate Minimum Test Coverage
+        run: make test-coverage-check
+        env:
+          TEST_RESULTS_DIR: workspace/test-results
+      - name: Generate Coverage
+        run: make coverage-combined
+      - uses: actions/upload-artifact@v4
+        with:
+          name: overall-test-coverage
+          include-hidden-files: true
+          path: |
+            workspace/test-results/coverage.json
