@@ -1,0 +1,13 @@
+name: Set Up Python
+description: Set up the Python environment for Merino
+runs:
+  using: "composite"
+  steps:
+    - name: Install poetry
+      run: pipx install poetry
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: "poetry"
+    - name: Create Workspace
+      run: mkdir -p workspace
